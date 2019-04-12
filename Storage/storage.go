@@ -1,24 +1,50 @@
 package storage
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/gob"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
-type test struct {
-	X int
-	Y int
+//entity that controls writing and reading data from disk
+type DataBaseDiskController struct {
+	FilePath string
 }
 
-//write file method.
-func writeFile() {
-	file, err := os.Create("test")
+//Saves data in generic interface to disk in binary encoding.
+func (cntr *DataBaseDiskController) SaveToDisk(data map[interface{}]interface{}) bool {
+	filePath, _ := filepath.Abs(cntr.FilePath)
+	file, err := os.Create(filePath + "/dbData")
 	defer file.Close()
 
 	if err != nil {
-		fmt.Println("Error!")
+		return false
+	}
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	encoder.Encode(data)
+	resToSave := buf.Bytes()
+
+	file.Write(resToSave)
+
+	return true
+}
+
+//Reads data from disk and returns it.
+func (cntr *DataBaseDiskController) ReadFromDisk() (map[interface{}]interface{}, bool) {
+	filePath, _ := filepath.Abs(cntr.FilePath)
+	dat, err := ioutil.ReadFile(filePath + "/dbData")
+
+	if err != nil {
+		return nil, false
 	}
 
-	pi := []byte{115, 111, 109, 101, 10}
-	file.Write(pi)
+	reader := bytes.NewReader(dat)
+	decoder := gob.NewDecoder(reader)
+	var obj map[interface{}]interface{}
+	decoder.Decode(&obj)
+
+	return obj, true
 }

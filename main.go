@@ -7,14 +7,13 @@ import (
 )
 
 func main() {
-	dataBase := new(db.DataBase)
-	dataBase.Init()
-	dataBase.Put("Arlan", "Cool!")
-	dataBase.Put("Zhomart", "Awesome!")
-	dataBase.Put("Serik", "Karakurt!#$")
-	val, ok := dataBase.Get("Zhomart")
+	var dataBase db.IDataBase = new(db.DataBase)
+	dataBase.InitFromDisk("DataBaseData")
+	val, ok := dataBase.Get("Arlan")
 	fmt.Println("The DataBase Value: ", val, "IsPresent? ", ok)
-	val, ok = dataBase.Get("LOLOLOLOL")
+	val, ok = dataBase.Get("Zhomart")
+	fmt.Println("The DataBase Value: ", val, "IsPresent? ", ok)
+	val, ok = dataBase.Get(1)
 	fmt.Println("The DataBase Value: ", val, "IsPresent? ", ok)
 
 }
